@@ -31,7 +31,6 @@ func handle(conn net.Conn) {
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		str := scanner.Text()
-
 		go func(str string) {
 			io.WriteString(conn, "\t"+strings.ToUpper(str)+"\n")
 			time.Sleep(time.Second)

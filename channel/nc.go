@@ -4,6 +4,7 @@ import (
 	"io"
 	"net"
 
+	"fmt"
 	"os"
 )
 
@@ -14,8 +15,15 @@ func main() {
 	}
 	defer conn.Close()
 
-	go copy(os.Stdout, conn)
+	done := make(chan struct{})
+
+	go func() {
+		copy(os.Stdout, conn)
+		fmt.Println("done")
+		done <- struct{}{}
+	}()
 	copy(conn, os.Stdin)
+	<-done
 }
 
 func copy(dst io.Writer, src io.Reader) {
