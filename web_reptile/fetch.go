@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -13,11 +14,12 @@ func main() {
 		if err != nil {
 			continue
 		}
-
 		bytes, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
 		if err != nil {
 			continue
 		}
+		fmt.Println(string(bytes))
 	}
 
 }

@@ -1,8 +1,14 @@
 package main
 
-import "golang.org/x/net/html"
+import (
+	"fmt"
 
-//获取一个link的所有子link, 可能会无限递归
+	"os"
+
+	"golang.org/x/net/html"
+)
+
+//获取一个link的所有子link, 可能会无限递归???
 func visit(links []string, n *html.Node) []string {
 
 	if n.Type == html.ElementNode && n.Data == "a" {
@@ -19,4 +25,17 @@ func visit(links []string, n *html.Node) []string {
 	}
 
 	return links
+}
+
+func main() {
+
+	doc, err := html.Parse(os.Stdin)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, link := range visit(nil, doc) {
+		fmt.Println(link)
+	}
+
 }
