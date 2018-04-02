@@ -8,13 +8,13 @@ import (
 	"golang.org/x/net/html"
 )
 
-func ForeachNode1(n *html.Node, start, end func(n *html.Node)) {
+func ForeachNode(n *html.Node, start, end func(n *html.Node)) {
 	if start != nil {
 		start(n)
 	}
 
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		ForeachNode1(c, start, end)
+		ForeachNode(c, start, end)
 	}
 
 	if end != nil {
@@ -52,22 +52,42 @@ func Extract(url string) (list []string, err error) {
 		}
 	}
 
-	ForeachNode1(doc, vistnode, nil)
+	ForeachNode(doc, vistnode, nil)
 
 	return
 }
 
-func main() {
-	for _, v := range os.Args[1:] {
-
-		list, err := Extract(v)
-		if err != nil {
-			continue
-		}
-
-		for _, vv := range list {
-			fmt.Println(vv)
-		}
-
+func Crawl(url string) (list []string) {
+	fmt.Println(url)
+	list, err := Extract(url)
+	if err != nil {
+		return
 	}
+	return
+}
+
+func BreadthFirst(f func(url string) []string, worklist []string) {
+
+	exist := make(map[string]bool)
+
+	for len(worklist) > 0 {
+		bak := worklist
+		worklist = nil
+
+		for _, url := range bak {
+
+			if !exist[url] {
+
+				exist[url] = true
+
+				worklist = append(worklist, f(url)...)
+			}
+		}
+	}
+
+}
+
+func main() {
+
+	BreadthFirst(Crawl, os.Args[1:])
 }
