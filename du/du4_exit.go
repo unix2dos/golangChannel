@@ -4,18 +4,39 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sync"
 	"time"
 )
 
+var progress = flag.Bool("v", false, "show progress")
+
 var limit = make(chan struct{}, 20)
 
+var done = make(chan struct{})
+
+func isExist() bool {
+	select {
+	case <-done:
+		return true
+	default:
+		return false
+	}
+}
+
+func print(nfiles, nbytes int64) {
+	fmt.Printf("%d files %.1fGB\n", nfiles, float64(nbytes)/1e9)
+}
+
 func Dir(name string, size chan int64, n *sync.WaitGroup) (err error) {
+	defer n.Done()
 	limit <- struct{}{}
 	defer func() { <-limit }()
+	if isExist() {
+		return
+	}
 
-	defer n.Done()
 	fileinfo, err := ioutil.ReadDir(name)
 	if err != nil {
 		return err
@@ -36,8 +57,6 @@ func Dir(name string, size chan int64, n *sync.WaitGroup) (err error) {
 	return
 }
 
-var progress = flag.Bool("v", false, "show progress")
-
 func main() {
 
 	flag.Parse()
@@ -53,7 +72,6 @@ func main() {
 
 	channle_size := make(chan int64)
 	var n sync.WaitGroup
-
 	for _, v := range args {
 		n.Add(1)
 		go Dir(v, channle_size, &n)
@@ -61,15 +79,23 @@ func main() {
 
 	go func() {
 		n.Wait()
-		fmt.Println("finish")
 		close(channle_size)
 	}()
 
-	var nfiles, nbytes int64
+	go func() {
+		os.Stdin.Read(make([]byte, 1))
+		close(done)
+	}()
 
+	var nfiles, nbytes int64
 loop:
 	for {
 		select {
+		case <-done:
+			for range channle_size {
+			}
+			//return //排空, return
+			panic("11") //小技巧, 看其他goroutine是否正确
 		case size, ok := <-channle_size:
 			if !ok {
 				break loop
@@ -82,8 +108,4 @@ loop:
 	}
 
 	print(nfiles, nbytes)
-
-}
-func print(nfiles, nbytes int64) {
-	fmt.Printf("%d files %.1fGB\n", nfiles, float64(nbytes)/1e9)
 }
