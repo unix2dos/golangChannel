@@ -14,8 +14,9 @@ func main() {
 	}
 	defer conn.Close()
 
-	go copy(os.Stdout, conn)
-	copy(conn, os.Stdin)
+	go copy(conn, os.Stdin)
+	copy(os.Stdout, conn)
+
 }
 
 func copy(dst io.Writer, src io.Reader) {
