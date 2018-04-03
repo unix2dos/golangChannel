@@ -119,3 +119,38 @@ func main() {
 
 	接收者收到数据发生在唤醒发送者goroutine之前
 
+
+
+### 数据竞争
+
++ 避免数据竞争
+	+ 全局变量一开始就初始化, 其他goroutine都读取
+	+ 避免多个goroutine访问同一个变量, 变量限定一个单独的goroutine
+
+		> 由于其它的goroutine不能够直接访问变量，它们只能使用一个channel来发送给指定的goroutine请求来查询更新变量。
+		
+		> 这也就是Go的口头禅“不要使用共享数据来通信；使用通信来共享数据”。
+	+ 避免数据竞争的方法是允许很多goroutine去访问变量，但是在同一个时刻最多只有一个goroutine在访问。这种方式被称为“互斥”
+
+	
+	
+	
+### 内存同步	
+	
+```
+var x, y int
+go func() {
+    x = 1 // A1
+    fmt.Print("y:", y, " ") // A2
+}()
+go func() {
+    y = 1                   // B1
+    fmt.Print("x:", x, " ") // B2
+}()
+
+
+x:0 y:0
+y:0 x:0
+```
+
+
