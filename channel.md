@@ -153,4 +153,15 @@ x:0 y:0
 y:0 x:0
 ```
 
+因为赋值和打印指向不同的变量，编译器可能会断定两条语句的顺序不会影响执行结果，并且会交换两个语句的执行顺序。
 
+如果两个goroutine在不同的CPU上执行，每一个核心有自己的缓存，这样一个goroutine的写入对于其它goroutine的Print，在主存同步之前就是不可见的了。
+
+
+### 竞争检测
+
+只要在go build，go run或者go test命令后面加上-race的flag，就会使编译器创建一个你的应用的“修改”版
+
+```
+go run -race cache/memo1_goroutine.go
+```
