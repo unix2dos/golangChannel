@@ -165,3 +165,11 @@ y:0 x:0
 ```
 go run -race cache/memo1_goroutine.go
 ```
+
+### 线程和gorutine
+
+
++ 线程一般2MB
++ gorutine开始2KB 最大值1GB
++ n个线程调度m个gorutine
++ GOMAXPROCS 是多少个线程执行Go的代码
