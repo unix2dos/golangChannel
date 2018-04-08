@@ -390,13 +390,13 @@ func main() {
 				value := rand.Intn(MaxRandomNumber)
 				if value == 0 {
 					select {
-					case stopByNameCh <- strconv.Itoa(i): //加select是为了不阻塞
+					case stopByNameCh <- strconv.Itoa(i): //加select是为了其他有发送的, 我就什么不干了
 					default:
 					}
 					return
 				}
 
-				select { //这边写是为了尽早
+				select { //这边写是为了尽早退出,越早越好
 				case <-stopCh:
 					return
 				default:
